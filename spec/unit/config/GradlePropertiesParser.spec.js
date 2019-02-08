@@ -138,7 +138,7 @@ describe('Gradle Builder', () => {
         });
     });
 
-    describe('_save method', () => {
+    describe('save method', () => {
         let parser;
         let emitSpy;
         let saveSpy;
@@ -158,7 +158,7 @@ describe('Gradle Builder', () => {
         });
 
         it('should detect save being called.', () => {
-            parser._save();
+            parser.save();
 
             expect(saveSpy).toHaveBeenCalled();
             expect(emitSpy.calls.argsFor(0)[1]).toContain('Updating and Saving File');

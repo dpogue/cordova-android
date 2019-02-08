@@ -26,7 +26,7 @@ class GradlePropertiesParser {
     /**
     * Loads and Edits Gradle Properties File.
     *
-    * @param {String} platformDir is the path of the Android platform directory
+    * @param {string} platformDir - The path of the Android platform directory.
     */
     constructor (platformDir) {
         this._defaults = {
@@ -37,10 +37,16 @@ class GradlePropertiesParser {
             'org.gradle.jvmargs': '-Xmx2048m',
 
             // allow NDK to be used - required by Gradle 1.5 plugin
-            'android.useDeprecatedNdk': 'true'
+            'android.useDeprecatedNdk': 'true',
 
             // Shaves another 100ms, but produces a "try at own risk" warning. Not worth it (yet):
-            // 'org.gradle.parallel': 'true'
+            // 'org.gradle.parallel': 'true',
+
+            // Default minimum SDK version is 19 (Android 4.4 - Kitkat)
+            'cdvMinSdkVersion': '19',
+
+            // Default SDK compile target is latest (currently 28)
+            'cdvCompileSdkVersion': '28'
         };
 
         this.gradleFilePath = path.join(platformDir, 'gradle.properties');
@@ -49,12 +55,48 @@ class GradlePropertiesParser {
     configure () {
         events.emit('verbose', '[Gradle Properties] Preparing Configuration');
 
-        this._initializeEditor();
+        if (!this.gradleFile) {
+            this._initializeEditor();
+        }
+
         this._configureDefaults();
-        this._save();
+        this.save();
     }
 
     /**
+     * Returns the value for the specified gradle property key.
+     *
+     * @param {string} key - The property key name.
+     * @returns {string} The property value.
+     */
+    get (key) {
+        if (!this.gradleFile) {
+            this._initializeEditor();
+        }
+
+        return this.gradleFile.get(key);
+    }
+
+    /**
+     * Associates a value with the specified key.
+     *
+     * An optional comment can also be provided. If the value is not specified
+     * or null, the key is unset.
+     *
+     * @param {string} key - The property key to set.
+     * @param {string?} value - The property value, or null to unset the property.
+     * @param {string?} comment - An optional comment.
+     */
+    set (key, value, comment) {
+        if (!this.gradleFile) {
+            this._initializeEditor();
+        }
+
+        this.gradleFile.set(key, value, comment);
+    }
+
+    /**
+     * @internal
      * Initialize the properties editor for parsing, setting, etc.
      */
     _initializeEditor () {
@@ -69,6 +111,7 @@ class GradlePropertiesParser {
     }
 
     /**
+     * @internal
      * Validate that defaults are set and set the missing defaults.
      */
     _configureDefaults () {
@@ -88,7 +131,7 @@ class GradlePropertiesParser {
     /**
      * Saves any changes that has been made to the properties file.
      */
-    _save () {
+    save () {
         events.emit('verbose', '[Gradle Properties] Updating and Saving File');
         this.gradleFile.save();
     }
