@@ -15,6 +15,7 @@ local.properties
 proguard.cfg
 proguard-project.txt
 example
+/build
 /coverage
 /framework/lib
 /framework/build
